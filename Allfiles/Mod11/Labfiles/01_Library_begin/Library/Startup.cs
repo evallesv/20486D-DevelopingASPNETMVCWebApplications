@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Library.Models;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace Library
 {
@@ -27,7 +30,22 @@ namespace Library
             services.AddDbContext<LibraryContext>(options =>
                  options.UseSqlite("Data Source=library.db"));
 
+            services.AddIdentity<User, IdentityRole>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 7;
+                options.Password.RequireUppercase = true;
+
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<LibraryContext>();
+
             services.AddMvc();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireEmail", policy => policy.RequireClaim(ClaimTypes.Email));
+            });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, LibraryContext libraryContext)
@@ -36,6 +54,8 @@ namespace Library
             libraryContext.Database.EnsureCreated();
 
             app.UseStaticFiles();
+
+            app.UseAuthentication();
 
             app.UseNodeModules(env.ContentRootPath);
 

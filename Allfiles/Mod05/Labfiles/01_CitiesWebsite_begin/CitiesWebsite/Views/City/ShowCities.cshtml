@@ -1,0 +1,10 @@
+﻿@{
+    ViewBag.Title = "ShowCities";
+}
+<h1>Select City</h1>
+@foreach (var item in ViewBag.Cities)
+{
+    <h2>
+        <a asp-action="ShowDataForCity" asp-route-cityname="@item.Key">@item.Key</a>
+    </h2>
+}
